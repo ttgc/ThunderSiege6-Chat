@@ -1,0 +1,20 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        cc: [ gcc, clang ]
+        os: [ ubuntu-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Build
+      uses: docker://lpenz/ghaction-cmake:latest
+      with:
+        cc: ${{ matrix.cc }}
