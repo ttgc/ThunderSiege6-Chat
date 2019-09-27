@@ -7,11 +7,11 @@ set(INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${INCLUDE_FOLDER})
 
 #Source files
-set(SOURCES ${SOURCE_FOLDER}/my_lib.cpp)
+set(SOURCES ${SOURCE_FOLDER}/thunderchatserver.cpp)
 
 #Headers files (for IntelliSense)
-set(HEADERS ${INCLUDE_FOLDER}/my_lib.hpp)
+set(HEADERS ${INCLUDE_FOLDER}/thunderchatserver.hpp)
 
 #Main lib
-add_library(my_lib ${SOURCES} ${HEADERS})
-target_include_directories(my_lib SYSTEM INTERFACE ${INCLUDE_FOLDER})
+add_library(Server ${SOURCES} ${HEADERS})
+target_include_directories(Server SYSTEM INTERFACE ${INCLUDE_FOLDER})
