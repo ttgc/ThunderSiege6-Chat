@@ -8,14 +8,14 @@ namespace network
 	public:
 		WinNetworkConfig() noexcept;
 		~WinNetworkConfig() noexcept;
-		WinNetworkConfig(WinNetworkConfig&& other) noexcept;
-		WinNetworkConfig& operator=(WinNetworkConfig&& rhs) noexcept;
+		WinNetworkConfig(WinNetworkConfig&& other) noexcept = default;
+		WinNetworkConfig& operator=(WinNetworkConfig&& rhs) noexcept = default;
 
 		WinNetworkConfig(const WinNetworkConfig& other) = delete;
 		WinNetworkConfig& operator=(const WinNetworkConfig& rhs) = delete;
 
-		bool hasFailed() { return m_failure; }
-		WSADATA getData() { return m_data; }
+		bool hasFailed() const noexcept { return m_failure; }
+		WSADATA getData() const noexcept { return m_data; }
 
 	private:
 		bool m_failure; // Indicate if the API has been initialized successful or not

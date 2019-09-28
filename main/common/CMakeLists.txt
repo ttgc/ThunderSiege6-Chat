@@ -7,10 +7,11 @@ set(INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${INCLUDE_FOLDER})
 
 #Source files
-set(SOURCES ${SOURCE_FOLDER}/tocompile.cpp)
+set(SOURCES ${SOURCE_FOLDER}/message.cpp)
 
 #Headers files (for IntelliSense)
-set(HEADERS ${INCLUDE_FOLDER}/network.hpp)
+set(HEADERS ${INCLUDE_FOLDER}/network.hpp
+			${INCLUDE_FOLDER}/message.hpp)
 
 #Windows source and headers
 if(WIN32)
