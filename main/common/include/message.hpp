@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <optional>
 #include <nlohmann/json.hpp>
 
 namespace network
@@ -22,7 +23,7 @@ namespace network
 				Team playerTeam,
 				const std::string& message
 			) noexcept;
-			Message(const nlohmann::json& message) noexcept;
+			static std::optional<Message> getMessageFromJson(const nlohmann::json& message) noexcept;
 			Message(const Message& other) noexcept = default;
 			Message(Message&& other) noexcept = default;
 			virtual ~Message() noexcept = default;
@@ -44,6 +45,7 @@ namespace network
 			std::string m_player;
 
 		private:
+			Message(const nlohmann::json& message) noexcept;
 			static size_t s_maxsizeUsername;
 			static size_t s_maxsizeMessage;
 		};

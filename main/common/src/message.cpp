@@ -15,9 +15,14 @@ namespace network
 				m_message(message), m_type(msgType), m_team(playerTeam), m_player(username)
 		{}
 
-		Message::Message(const nlohmann::json& message) noexcept :
-			Message(message.at("msg"), message.at("msg_type"), message.at("team"), message.at("username"))
-		{}
+		std::optional<Message> Message::getMessageFromJson(const nlohmann::json & message) noexcept
+		{
+			if (message.contains("username") && message.contains("msg_type") &&
+				message.contains("team") && message.contains("msg"))
+			{
+				return Message(message);
+			}
+		}
 
 		nlohmann::json Message::getJsonMessage() const noexcept
 		{
@@ -36,5 +41,9 @@ namespace network
 		{
 			return (m_player.size() <= s_maxsizeUsername) && (m_message.size() <= s_maxsizeMessage);
 		}
+
+		Message::Message(const nlohmann::json& message) noexcept :
+			Message(message.at("msg"), message.at("msg_type"), message.at("team"), message.at("username"))
+		{}
 	}
 }
