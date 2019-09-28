@@ -24,6 +24,7 @@ namespace network
 				const std::string& message
 			) noexcept;
 			static std::optional<Message> getMessageFromJson(const nlohmann::json& message) noexcept;
+
 			Message(const Message& other) noexcept = default;
 			Message(Message&& other) noexcept = default;
 			virtual ~Message() noexcept = default;

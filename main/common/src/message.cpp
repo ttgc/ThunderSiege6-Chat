@@ -18,10 +18,15 @@ namespace network
 		std::optional<Message> Message::getMessageFromJson(const nlohmann::json & message) noexcept
 		{
 			if (message.contains("username") && message.contains("msg_type") &&
-				message.contains("team") && message.contains("msg"))
+				message.contains("team") && message.contains("msg") &&
+				message.at("msg_type").is_number_unsigned() &&
+				message.at("team").is_number_unsigned() &&
+				(message.at("msg_type") == GLOBAL || message.at("msg_type") == TEAM) &&
+				(message.at("team") == TEAM_A || message.at("team") == TEAM_B))
 			{
 				return Message(message);
 			}
+			return std::nullopt;
 		}
 
 		nlohmann::json Message::getJsonMessage() const noexcept

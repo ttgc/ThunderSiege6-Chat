@@ -10,4 +10,4 @@ find_package(fmt CONFIG REQUIRED)
 #Link the library for all the projects
 link_libraries(Microsoft.GSL::GSL)
 link_libraries(nlohmann_json::nlohmann_json)
-link_libraries(fmt)
+link_libraries(fmt::fmt)
