@@ -10,7 +10,7 @@ namespace server
 	class ThunderChatServer
 	{
 	public:
-		using CallbackType = std::function<void(const std::string& client);
+		using CallbackType = std::function<void(const std::string& client)>;
 
 		ThunderChatServer(const std::string& ip, int port) noexcept;
 		virtual ~ThunderChatServer() noexcept;
