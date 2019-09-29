@@ -15,4 +15,3 @@ set(HEADERS ${INCLUDE_FOLDER}/thunderchatserver.hpp)
 #Main lib
 add_library(Server ${SOURCES} ${HEADERS})
 target_include_directories(Server SYSTEM INTERFACE ${INCLUDE_FOLDER})
-target_link_libraries(Server PUBLIC GSL)
