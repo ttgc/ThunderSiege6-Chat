@@ -15,3 +15,5 @@ set(HEADERS ${INCLUDE_FOLDER}/ThunderChatClient.hpp)
 #Main lib
 add_library(mylib ${SOURCES} ${HEADERS})
 target_include_directories(mylib SYSTEM INTERFACE ${INCLUDE_FOLDER})
+
+target_link_libraries(mylib PUBLIC common)
