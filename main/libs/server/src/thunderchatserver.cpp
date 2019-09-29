@@ -1,14 +1,13 @@
 #include "thunderchatserver.hpp"
-#include "network.hpp"
 
 namespace server
 {
 	ThunderChatServer::ThunderChatServer(const std::string& ip, int port) noexcept :
 		m_connectCallback(), m_disconnectCallback(), m_serverThread(nullptr), m_running(false),
-		m_returnCode(0), m_clients()
+		m_returnCode(0), m_serverSocket(), m_clients()
 	{
-		m_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-		m_returnCode = m_serverSocket < 0 ? -m_serverSocket : 0;
+		SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
+		m_returnCode = s <= 0 ? static_cast<uint32_t>(s) : 0;
 		if (m_returnCode) return;
 
 		sockaddr_in addrv4;
