@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(BUILDSYSTEM_PROJECTS_DIR 
-    mylib
+set(BUILDSYSTEM_PROJECTS_DIR
+    common
     myexe
 )
 
