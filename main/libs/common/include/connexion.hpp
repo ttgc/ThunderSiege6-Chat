@@ -13,9 +13,9 @@ namespace network
 		virtual ~Connexion() noexcept;
 
 		Connexion(const Connexion& other) noexcept = delete;
-		Connexion(Connexion&& other) noexcept = default;
+		Connexion(Connexion&& other) = default;
 		Connexion& operator=(const Connexion& rhs) noexcept = delete;
-		Connexion& operator=(Connexion&& rhs) noexcept = default;
+		Connexion& operator=(Connexion&& rhs) = default;
 
 		bool isActive() const noexcept { return m_active; }
 		SOCKET getSocket() const noexcept { return m_socket; }

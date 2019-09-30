@@ -13,9 +13,9 @@ namespace server
 			network::message::Team team,
 			std::shared_ptr<network::Connexion>&& connexion
 		) noexcept;
-		ClientData(const ClientData& other) noexcept = default;
-		ClientData(ClientData&& other) noexcept = default;
-		~ClientData() noexcept = default;
+		ClientData(const ClientData& other) = default;
+		ClientData(ClientData&& other) = default;
+		~ClientData() = default;
 		ClientData& operator=(const ClientData& rhs) = default;
 		ClientData& operator=(ClientData&& rhs) = default;
 

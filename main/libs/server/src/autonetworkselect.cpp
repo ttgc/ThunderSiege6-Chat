@@ -47,18 +47,91 @@ namespace server
 	}
 
 	AutoNetworkSelect::AutoNetworkSelect(const AutoNetworkSelect& other) noexcept :
-		m_reading(std::make_shared<fd_set>(*other.m_reading)),
-		m_writing(std::make_shared<fd_set>(*other.m_writing)),
-		m_except(std::make_shared<fd_set>(*other.m_except)),
+		m_reading(other.m_reading == nullptr ? nullptr : std::make_shared<fd_set>()),
+		m_writing(other.m_writing == nullptr ? nullptr : std::make_shared<fd_set>()),
+		m_except(other.m_except == nullptr ? nullptr : std::make_shared<fd_set>()),
 		m_timeout(other.m_timeout), m_retCode(other.m_retCode)
-	{}
+	{
+		if (m_reading != nullptr)
+		{
+			FD_ZERO(m_reading.get());
+			std::for_each(
+				other.m_reading->fd_array,
+				other.m_reading->fd_array + other.m_reading->fd_count,
+				[this](const SOCKET& s) {
+					FD_SET(s, m_reading.get());
+				}
+			);
+		}
+
+		if (m_writing != nullptr) 
+		{
+			FD_ZERO(m_writing.get());
+			std::for_each(
+				other.m_writing->fd_array,
+				other.m_writing->fd_array + other.m_writing->fd_count,
+				[this](const SOCKET& s) {
+					FD_SET(s, m_writing.get());
+				}
+			);
+		}
+
+		if (m_except != nullptr)
+		{
+			FD_ZERO(m_except.get());
+			std::for_each(
+				other.m_except->fd_array,
+				other.m_except->fd_array + other.m_except->fd_count,
+				[this](const SOCKET& s) {
+					FD_SET(s, m_except.get());
+				}
+			);
+		}
+	}
 
 	AutoNetworkSelect& AutoNetworkSelect::operator=(const AutoNetworkSelect& rhs) noexcept
 	{
 		if (this == &rhs) return *this;
-		m_reading = std::make_shared<fd_set>(*rhs.m_reading);
-		m_writing = std::make_shared<fd_set>(*rhs.m_writing);
-		m_except = std::make_shared<fd_set>(*rhs.m_except);
+		m_reading = rhs.m_reading == nullptr ? nullptr : std::make_shared<fd_set>();
+		m_writing = rhs.m_writing == nullptr ? nullptr : std::make_shared<fd_set>();
+		m_except = rhs.m_except == nullptr ? nullptr : std::make_shared<fd_set>();
+
+		if (m_reading != nullptr)
+		{
+			FD_ZERO(m_reading.get());
+			std::for_each(
+				rhs.m_reading->fd_array,
+				rhs.m_reading->fd_array + rhs.m_reading->fd_count,
+				[this](const SOCKET& s) {
+					FD_SET(s, m_reading.get());
+				}
+			);
+		}
+
+		if (m_writing != nullptr)
+		{
+			FD_ZERO(m_writing.get());
+			std::for_each(
+				rhs.m_writing->fd_array,
+				rhs.m_writing->fd_array + rhs.m_writing->fd_count,
+				[this](const SOCKET& s) {
+					FD_SET(s, m_writing.get());
+				}
+			);
+		}
+
+		if (m_except != nullptr)
+		{
+			FD_ZERO(m_except.get());
+			std::for_each(
+				rhs.m_except->fd_array,
+				rhs.m_except->fd_array + rhs.m_except->fd_count,
+				[this](const SOCKET& s) {
+					FD_SET(s, m_except.get());
+				}
+			);
+		}
+
 		m_timeout = rhs.m_timeout;
 		m_retCode = rhs.m_retCode;
 		return *this;

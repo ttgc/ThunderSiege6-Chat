@@ -19,7 +19,7 @@ namespace server
 
 		ThunderChatServer(const std::string& ip, uint16_t port) noexcept;
 		virtual ~ThunderChatServer() noexcept;
-		ThunderChatServer(ThunderChatServer&& other) noexcept = default;
+		ThunderChatServer(ThunderChatServer&& other) = default;
 
 		ThunderChatServer(const ThunderChatServer& other) = delete;
 		ThunderChatServer& operator=(const ThunderChatServer& rhs) = delete;
@@ -48,5 +48,7 @@ namespace server
 
 		network::NonBlockingConnexion m_serverSocket;
 		std::array<ClientData, 10> m_clients;
+
+		std::vector<network::message::Message> m_messageQueue;
 	};
 }

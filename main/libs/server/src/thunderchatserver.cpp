@@ -8,7 +8,7 @@ namespace server
 {
 	ThunderChatServer::ThunderChatServer(const std::string& ip, uint16_t port) noexcept :
 		m_connectCallback(), m_disconnectCallback(), m_acceptThread(nullptr), m_serverThread(nullptr),
-		m_running(false), m_returnCode(0), m_serverSocket(ip, port), m_clients()
+		m_running(false), m_returnCode(0), m_serverSocket(ip, port), m_clients(), m_messageQueue()
 	{
 		m_returnCode = 
 			m_serverSocket.isActive() ? 0 : static_cast<uint32_t>(m_serverSocket.getSocket()) + 1;
@@ -163,12 +163,109 @@ namespace server
 
 	void ThunderChatServer::run() noexcept
 	{
-		const size_t maxSize = 1024;
-		std::array<char, maxSize> buffer;
-
 		while (m_running)
 		{
-			//AutoNetworkSelect selector();
+			std::vector<std::optional<SOCKET>> opt(10);
+			std::transform(m_clients.begin(), m_clients.end(), opt.begin(),
+				[](const ClientData& cli) -> std::optional<SOCKET> {
+					auto connexion = cli.getConnexion();
+					if (connexion != nullptr && connexion->isActive()) return connexion->getSocket();
+					return std::nullopt;
+				}
+			);
+			auto end = 
+				std::remove_if(opt.begin(), opt.end(), [](std::optional<SOCKET> socket) -> bool {
+					return (!socket.has_value());
+				});
+			std::vector<SOCKET> vec(end - opt.begin());
+			std::transform(opt.begin(), end, vec.begin(),
+				[](const std::optional<SOCKET>& cli) -> SOCKET {
+					return cli.value();
+				}
+			);
+
+			AutoNetworkSelect selector(vec, vec, vec, std::chrono::microseconds(10));
+
+			std::for_each(
+				std::execution::par,
+				m_clients.begin(),
+				m_clients.end(),
+				[this, selector](const ClientData& cli) {
+					if (cli.getConnexion() != nullptr && cli.getConnexion()->isActive())
+					{
+						auto connexion = cli.getConnexion();
+						if (selector.isExceptSet(connexion->getSocket()))
+						{
+							connexion->close();
+							std::for_each(
+								std::execution::par,
+								m_disconnectCallback.begin(),
+								m_disconnectCallback.end(),
+								[connexion](CallbackType callback) {
+									callback(fmt::format(
+										"{}:{}", 
+										connexion->getIP(), 
+										connexion->getPort()
+									));
+								}
+							);
+							return;
+						}
+
+						if (selector.isReadSet(connexion->getSocket()))
+						{
+							std::array<char, 1024> buffer;
+							int length = recv(connexion->getSocket(), buffer.data(), 1024, 0);
+
+							if (length > 0)
+							{
+								std::string received(buffer.data(), length);
+								auto msg = network::message::Message::getMessageFromJson(received);
+								if (msg.has_value())
+								{
+									m_messageQueue.push_back(msg.value());
+								}
+							}
+						}
+					}
+				}
+			);
+
+			std::for_each(
+				std::execution::par,
+				m_messageQueue.begin(),
+				m_messageQueue.end(),
+				[this, selector](const network::message::Message& msg) {
+					auto rawMessage = msg.getJsonMessage().dump();
+					std::array<char, 1024> buffer;
+					size_t length = rawMessage.size() <= 1024 ? rawMessage.size() : 1024;
+					std::transform(
+						rawMessage.begin(),
+						rawMessage.size() <= 1024 ? rawMessage.end() : rawMessage.begin() + 1024,
+						buffer.begin(),
+						[](char c) -> char { return c; }
+					);
+
+					std::for_each(
+						std::execution::seq,
+						m_clients.begin(),
+						m_clients.end(),
+						[buffer, length, selector](const ClientData& cli) {
+							auto connexion = cli.getConnexion();
+							if (connexion != nullptr &&
+								connexion->isActive() &&
+								selector.isWriteSet(connexion->getSocket()))
+							{
+								int sentBytes = send(
+									connexion->getSocket(),
+									buffer.data(),
+									static_cast<int>(length), 0
+								);
+							}
+						}
+					);
+				}
+			);
 		}
 	}
 }
