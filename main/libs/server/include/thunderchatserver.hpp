@@ -7,6 +7,7 @@
 #include <thread>
 #include <atomic>
 #include "network.hpp"
+#include "connexion.hpp"
 
 namespace server
 {
@@ -15,7 +16,7 @@ namespace server
 	public:
 		using CallbackType = std::function<void(const std::string& client)>;
 
-		ThunderChatServer(const std::string& ip, int port) noexcept;
+		ThunderChatServer(const std::string& ip, uint16_t port) noexcept;
 		virtual ~ThunderChatServer() noexcept;
 		ThunderChatServer(ThunderChatServer&& other) noexcept = default;
 
@@ -39,7 +40,7 @@ namespace server
 		std::atomic_bool m_running;
 		uint32_t m_returnCode;
 
-		SOCKET m_serverSocket;
-		std::array<SOCKET, 10> m_clients;
+		Connexion m_serverSocket;
+		std::array<Connexion, 10> m_clients;
 	};
 }

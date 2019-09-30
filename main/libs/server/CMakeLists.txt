@@ -10,7 +10,8 @@ include_directories(${INCLUDE_FOLDER})
 set(SOURCES ${SOURCE_FOLDER}/thunderchatserver.cpp)
 
 #Headers files (for IntelliSense)
-set(HEADERS ${INCLUDE_FOLDER}/thunderchatserver.hpp)
+set(HEADERS ${INCLUDE_FOLDER}/thunderchatserver.hpp
+			${INCLUDE_FOLDER}/connexion.hpp)
 
 #Main lib
 add_library(Server ${SOURCES} ${HEADERS})
