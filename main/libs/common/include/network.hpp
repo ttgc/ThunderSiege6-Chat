@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN_WIN32_WIN32
 #define NOMINMAX
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -23,3 +23,8 @@ using SOCKET = int;
 #define SD_BOTH SHUT_RDWR
 #define closesocket(s) close(s)
 #endif
+
+namespace network
+{
+	void setNonBlockingSocket(SOCKET& s);
+}

@@ -7,7 +7,8 @@ set(INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${INCLUDE_FOLDER})
 
 #Source files
-set(SOURCES ${SOURCE_FOLDER}/message.cpp
+set(SOURCES ${SOURCE_FOLDER}/network.cpp
+			${SOURCE_FOLDER}/message.cpp
 			${SOURCE_FOLDER}/connexion.cpp)
 
 #Headers files (for IntelliSense)
