@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 #ifdef _WIN32
 
@@ -27,4 +28,5 @@ using SOCKET = int;
 namespace network
 {
 	void setNonBlockingSocket(SOCKET& s);
+	int getNfds(const std::vector<SOCKET>& sockets = std::vector<SOCKET>());
 }
