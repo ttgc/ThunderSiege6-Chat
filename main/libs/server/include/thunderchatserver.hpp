@@ -31,16 +31,18 @@ namespace server
 		bool isRunning() const noexcept { return m_running; }
 
 	private:
-		void run();
+		void acceptCallback() noexcept;
+		void run() noexcept;
 
 		std::vector<CallbackType> m_connectCallback;
 		std::vector<CallbackType> m_disconnectCallback;
 
+		std::unique_ptr<std::thread> m_acceptThread;
 		std::unique_ptr<std::thread> m_serverThread;
 		std::atomic_bool m_running;
 		uint32_t m_returnCode;
 
-		Connexion m_serverSocket;
-		std::array<Connexion, 10> m_clients;
+		network::Connexion m_serverSocket;
+		std::array<network::Connexion, 10> m_clients;
 	};
 }
