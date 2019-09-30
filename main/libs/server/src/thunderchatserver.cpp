@@ -52,6 +52,10 @@ namespace server
 		{
 			m_running = false;
 
+			if (m_acceptThread != nullptr && m_acceptThread->joinable())
+			{
+				m_acceptThread->join();
+			}
 			if (m_serverThread != nullptr && m_serverThread->joinable())
 			{
 				m_serverThread->join();
@@ -82,20 +86,38 @@ namespace server
 			sockaddr clientAddr;
 			socklen_t clientAddrSize = sizeof(sockaddr);
 			SOCKET s = accept(m_serverSocket.getSocket(), &clientAddr, &clientAddrSize);
-			return (s > 0) ? 
-				std::make_shared<network::Connexion>(s, clientAddr, clientAddrSize) : 
-				std::make_shared<network::Connexion>();
+			if (s > 0)
+			{
+				auto cli = std::make_shared<network::Connexion>(s, clientAddr, clientAddrSize);
+				std::for_each(
+					std::execution::par,
+					m_connectCallback.begin(),
+					m_connectCallback.end(), 
+					[cli](CallbackType callback) {
+						callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
+					}
+				);
+				return cli;
+			}
+			return std::make_shared<network::Connexion>();
 		};
 
-		std::replace_if(
-			m_clients.begin(),
-			m_clients.end(),
-			[](std::shared_ptr<network::Connexion> cli) -> bool { return !cli->isActive(); },
-			generator()
-		);
+		while (m_running)
+		{
+			std::replace_if(
+				m_clients.begin(),
+				m_clients.end(),
+				[](std::shared_ptr<network::Connexion> cli) -> bool { return !cli->isActive(); },
+				generator()
+			);
+		}
 	}
 
 	void ThunderChatServer::run() noexcept
 	{
+		while (m_running)
+		{
+			//
+		}
 	}
 }
