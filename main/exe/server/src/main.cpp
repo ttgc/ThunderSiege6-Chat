@@ -1,6 +1,5 @@
 #include "thunderchatserver.hpp"
 #include <iostream>
-#include <chrono>
 
 #ifdef _WIN32
 #include "winnetworkconfig.hpp"
@@ -17,11 +16,11 @@ int main(void)
 	server::ThunderChatServer server("127.0.0.1", 8888);
 	if (server.isRunning())
 	{
-		using namespace std::chrono_literals;
 		std::cout << "Server is running on : " << server.getIP() << ":" << server.getPort() << "\n";
 		server.onConnect([](const std::string& client) { std::cout << client << " is now online\n"; });
 		server.onDisconnect([](const std::string& client) { std::cout << client << " is now offline\n"; });
-		std::this_thread::sleep_for(10s);
+		std::cout << "Press return key to stop the server\n\n";
+		std::cin.ignore();
 	}
 	else
 	{
