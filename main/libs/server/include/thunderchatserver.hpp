@@ -8,6 +8,7 @@
 #include <atomic>
 #include "network.hpp"
 #include "connexion.hpp"
+#include "clientdata.hpp"
 
 namespace server
 {
@@ -46,6 +47,6 @@ namespace server
 		uint32_t m_returnCode;
 
 		network::NonBlockingConnexion m_serverSocket;
-		std::array<std::shared_ptr<network::Connexion>, 10> m_clients;
+		std::array<ClientData, 10> m_clients;
 	};
 }

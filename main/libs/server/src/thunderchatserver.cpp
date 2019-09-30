@@ -1,6 +1,7 @@
 #include <execution>
 #include <fmt/format.h>
 #include "message.hpp"
+#include "autonetworkselect.hpp"
 #include "thunderchatserver.hpp"
 
 namespace server
@@ -66,16 +67,17 @@ namespace server
 			m_serverThread = nullptr;
 
 			std::for_each(m_clients.begin(), m_clients.end(),
-				[this](std::shared_ptr<network::Connexion> cli) {
-					if (cli != nullptr && cli->isActive())
+				[this](const ClientData& cli) {
+					auto connexion = cli.getConnexion();
+					if (connexion != nullptr && connexion->isActive())
 					{
-						cli->close();
+						cli.getConnexion()->close();
 						std::for_each(
 							std::execution::par,
 							m_disconnectCallback.begin(),
 							m_disconnectCallback.end(),
-							[&cli](CallbackType callback) {
-								callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
+							[connexion](CallbackType callback) {
+								callback(fmt::format("{}:{}", connexion->getIP(), connexion->getPort()));
 							}
 						);
 					}
@@ -88,7 +90,7 @@ namespace server
 
 	void ThunderChatServer::acceptCallback() noexcept
 	{
-		const auto generator = [this]() -> std::shared_ptr<network::Connexion> {
+		const auto generator = [this]() -> ClientData {
 			sockaddr clientAddr;
 			socklen_t clientAddrSize = sizeof(sockaddr);
 			SOCKET s = accept(m_serverSocket.getSocket(), &clientAddr, &clientAddrSize);
@@ -102,14 +104,48 @@ namespace server
 						m_connectCallback.begin(),
 						m_connectCallback.end(),
 						[cli](CallbackType callback) {
-						callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
-					}
+							callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
+						}
 					);
-					return cli;
+
+					bool loop(true), couldrecv(false);
+					std::vector<SOCKET> vec { cli->getSocket() };
+					int iter = 10;
+					while (loop)
+					{
+						AutoNetworkSelect selector(
+							vec, std::vector<SOCKET>(), std::vector<SOCKET>(),
+							std::chrono::microseconds(1000)
+						);
+						if (selector.hasFailed()) return ClientData();
+						couldrecv = selector.isReadSet(cli->getSocket());
+						loop = (!couldrecv) && iter;
+						--iter;
+					}
+
+					if (couldrecv)
+					{
+						std::array<char, 1024> buffer;
+						int length = recv(cli->getSocket(), buffer.data(), 1024, 0);
+
+						if (length > 0)
+						{
+							std::string received(buffer.data(), length);
+							auto msg = network::message::Message::getMessageFromJson(received);
+							if (msg.has_value())
+							{
+								ClientData data(
+									msg.value().getPlayerUsername(),
+									msg.value().getPlayerTeam(),
+									std::move(cli)
+								);
+								return data;
+							}
+						}
+					}
 				}
-				return nullptr;
 			}
-			return nullptr;
+			return ClientData();
 		};
 
 		while (m_running)
@@ -117,8 +153,8 @@ namespace server
 			std::replace_if(
 				m_clients.begin(),
 				m_clients.end(),
-				[](std::shared_ptr<network::Connexion> cli) -> bool {
-					return cli != nullptr && !cli->isActive();
+				[](const ClientData& cli) -> bool {
+					return cli.getConnexion() != nullptr && !cli.getConnexion()->isActive();
 				},
 				generator()
 			);
@@ -132,7 +168,7 @@ namespace server
 
 		while (m_running)
 		{
-			//
+			//AutoNetworkSelect selector();
 		}
 	}
 }

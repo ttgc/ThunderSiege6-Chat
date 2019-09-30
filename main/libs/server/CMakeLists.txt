@@ -8,11 +8,13 @@ include_directories(${INCLUDE_FOLDER})
 
 #Source files
 set(SOURCES ${SOURCE_FOLDER}/thunderchatserver.cpp
-			${SOURCE_FOLDER}/autonetworkselect.cpp)
+			${SOURCE_FOLDER}/autonetworkselect.cpp
+			${SOURCE_FOLDER}/clientdata.cpp)
 
 #Headers files (for IntelliSense)
 set(HEADERS ${INCLUDE_FOLDER}/thunderchatserver.hpp
-			${INCLUDE_FOLDER}/autonetworkselect.hpp)
+			${INCLUDE_FOLDER}/autonetworkselect.hpp
+			${INCLUDE_FOLDER}/clientdata.hpp)
 
 #Main lib
 add_library(Server ${SOURCES} ${HEADERS})
