@@ -9,7 +9,7 @@ namespace server
 		m_running(false), m_returnCode(0), m_serverSocket(ip, port), m_clients()
 	{
 		m_returnCode = 
-			m_serverSocket.isActive() ? 0 : m_serverSocket.getSocket() + 1;
+			m_serverSocket.isActive() ? 0 : static_cast<uint32_t>(m_serverSocket.getSocket()) + 1;
 		if (m_returnCode) return;
 
 		sockaddr_in addrv4;
@@ -58,12 +58,19 @@ namespace server
 			}
 			m_serverThread = nullptr;
 
-			std::for_each(m_clients.begin(), m_clients.end(), [this](network::Connexion& cli) {
-				cli.close();
-				std::for_each(std::execution::par, m_disconnectCallback.begin(), m_disconnectCallback.end(), [&cli](CallbackType callback) {
-					callback(fmt::format("{}:{}", cli.getIP(), cli.getPort()));
-				});
-			});
+			std::for_each(m_clients.begin(), m_clients.end(),
+				[this](std::shared_ptr<network::Connexion> cli) {
+					cli->close();
+					std::for_each(
+						std::execution::par,
+						m_disconnectCallback.begin(),
+						m_disconnectCallback.end(),
+						[&cli](CallbackType callback) {
+							callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
+						}
+					);
+				}
+			);
 
 			m_serverSocket.close();
 		}
@@ -71,18 +78,20 @@ namespace server
 
 	void ThunderChatServer::acceptCallback() noexcept
 	{
-		const auto generator = [this]() -> std::tuple<SOCKET, sockaddr, socklen_t> {
+		const auto generator = [this]() -> std::shared_ptr<network::Connexion> {
 			sockaddr clientAddr;
 			socklen_t clientAddrSize = sizeof(sockaddr);
 			SOCKET s = accept(m_serverSocket.getSocket(), &clientAddr, &clientAddrSize);
-			return std::make_tuple(s, clientAddr, clientAddrSize);
+			return (s > 0) ? 
+				std::make_shared<network::Connexion>(s, clientAddr, clientAddrSize) : 
+				std::make_shared<network::Connexion>();
 		};
 
 		std::replace_if(
 			m_clients.begin(),
 			m_clients.end(),
-			[](const network::Connexion& cli) -> bool { return !cli.isActive(); },
-			network::Connexion(generator())
+			[](std::shared_ptr<network::Connexion> cli) -> bool { return !cli->isActive(); },
+			generator()
 		);
 	}
 

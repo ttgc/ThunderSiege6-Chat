@@ -43,6 +43,6 @@ namespace server
 		uint32_t m_returnCode;
 
 		network::Connexion m_serverSocket;
-		std::array<network::Connexion, 10> m_clients;
+		std::array<std::shared_ptr<network::Connexion>, 10> m_clients;
 	};
 }
