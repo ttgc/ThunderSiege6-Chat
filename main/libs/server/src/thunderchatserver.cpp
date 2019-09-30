@@ -1,5 +1,6 @@
 #include <execution>
 #include <fmt/format.h>
+#include "message.hpp"
 #include "thunderchatserver.hpp"
 
 namespace server
@@ -28,6 +29,7 @@ namespace server
 		m_returnCode = retCode < 0 ? -retCode : 0;
 		if (m_returnCode) return;
 
+		m_acceptThread = std::make_unique<std::thread>([this]() { acceptCallback(); });
 		m_serverThread = std::make_unique<std::thread>([this]() { run(); });
 	}
 
@@ -60,19 +62,23 @@ namespace server
 			{
 				m_serverThread->join();
 			}
+			m_acceptThread = nullptr;
 			m_serverThread = nullptr;
 
 			std::for_each(m_clients.begin(), m_clients.end(),
 				[this](std::shared_ptr<network::Connexion> cli) {
-					cli->close();
-					std::for_each(
-						std::execution::par,
-						m_disconnectCallback.begin(),
-						m_disconnectCallback.end(),
-						[&cli](CallbackType callback) {
-							callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
-						}
-					);
+					if (cli != nullptr && cli->isActive())
+					{
+						cli->close();
+						std::for_each(
+							std::execution::par,
+							m_disconnectCallback.begin(),
+							m_disconnectCallback.end(),
+							[&cli](CallbackType callback) {
+								callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
+							}
+						);
+					}
 				}
 			);
 
@@ -88,18 +94,22 @@ namespace server
 			SOCKET s = accept(m_serverSocket.getSocket(), &clientAddr, &clientAddrSize);
 			if (s > 0)
 			{
-				auto cli = std::make_shared<network::Connexion>(s, clientAddr, clientAddrSize);
-				std::for_each(
-					std::execution::par,
-					m_connectCallback.begin(),
-					m_connectCallback.end(), 
-					[cli](CallbackType callback) {
+				auto cli = std::make_shared<network::NonBlockingConnexion>(s, clientAddr, clientAddrSize);
+				if (cli->isActive())
+				{
+					std::for_each(
+						std::execution::par,
+						m_connectCallback.begin(),
+						m_connectCallback.end(),
+						[cli](CallbackType callback) {
 						callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
 					}
-				);
-				return cli;
+					);
+					return cli;
+				}
+				return nullptr;
 			}
-			return std::make_shared<network::Connexion>();
+			return nullptr;
 		};
 
 		while (m_running)
@@ -107,7 +117,9 @@ namespace server
 			std::replace_if(
 				m_clients.begin(),
 				m_clients.end(),
-				[](std::shared_ptr<network::Connexion> cli) -> bool { return !cli->isActive(); },
+				[](std::shared_ptr<network::Connexion> cli) -> bool {
+					return cli != nullptr && !cli->isActive();
+				},
 				generator()
 			);
 		}
@@ -115,6 +127,9 @@ namespace server
 
 	void ThunderChatServer::run() noexcept
 	{
+		const size_t maxSize = 1024;
+		std::array<char, maxSize> buffer;
+
 		while (m_running)
 		{
 			//

@@ -10,7 +10,6 @@ namespace network
 		Connexion() noexcept;
 		Connexion(const std::string& ip, uint16_t port) noexcept;
 		Connexion(SOCKET sock, sockaddr addr, socklen_t size) noexcept;
-		explicit Connexion(std::tuple<SOCKET, sockaddr, socklen_t> existingConnexion) noexcept;
 		virtual ~Connexion() noexcept;
 
 		Connexion(const Connexion& other) noexcept = delete;
@@ -25,10 +24,18 @@ namespace network
 
 		void close() noexcept;
 
-	private:
+	protected:
 		bool m_active = false;
 		SOCKET m_socket = 0;
 		std::string m_ip = "0.0.0.0";
 		uint16_t m_port = 0;
+	};
+
+	class NonBlockingConnexion : public Connexion
+	{
+	public:
+		NonBlockingConnexion() noexcept;
+		NonBlockingConnexion(const std::string& ip, uint16_t port) noexcept;
+		NonBlockingConnexion(SOCKET sock, sockaddr addr, socklen_t size) noexcept;
 	};
 }

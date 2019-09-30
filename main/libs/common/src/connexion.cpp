@@ -17,13 +17,10 @@ namespace network
 		m_port(ntohs(reinterpret_cast<sockaddr_in*>(&addr)->sin_port))
 	{
 		std::array<char, 512> ip;
-		inet_ntop(addr.sa_family, &addr, ip.data(), 512);
+		auto retCode = inet_ntop(addr.sa_family, &addr, ip.data(), 512);
 		m_ip = std::string(ip.begin(), ip.end());
+		if (retCode == nullptr) m_active = false;
 	}
-
-	Connexion::Connexion(std::tuple<SOCKET, sockaddr, socklen_t> existingConnexion) noexcept :
-		Connexion(std::get<0>(existingConnexion), std::get<1>(existingConnexion), std::get<2>(existingConnexion))
-	{}
 
 	Connexion::~Connexion() noexcept
 	{
@@ -38,5 +35,22 @@ namespace network
 			closesocket(m_socket);
 			m_active = false;
 		}
+	}
+
+	NonBlockingConnexion::NonBlockingConnexion() noexcept : Connexion()
+	{
+		network::setNonBlockingSocket(m_socket);
+	}
+
+	NonBlockingConnexion::NonBlockingConnexion(const std::string& ip, uint16_t port) noexcept :
+		Connexion(ip, port)
+	{
+		network::setNonBlockingSocket(m_socket);
+	}
+
+	NonBlockingConnexion::NonBlockingConnexion(SOCKET sock, sockaddr addr, socklen_t size) noexcept :
+		Connexion(sock, addr, size)
+	{
+		network::setNonBlockingSocket(m_socket);
 	}
 }

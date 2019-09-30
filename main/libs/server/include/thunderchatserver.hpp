@@ -29,6 +29,9 @@ namespace server
 		void stop() noexcept;
 
 		bool isRunning() const noexcept { return m_running; }
+		std::string getIP() const noexcept { return m_serverSocket.getIP(); }
+		uint16_t getPort() const noexcept { return m_serverSocket.getPort(); }
+		uint32_t getErrorCode() const noexcept { return m_returnCode; }
 
 	private:
 		void acceptCallback() noexcept;
@@ -42,7 +45,7 @@ namespace server
 		std::atomic_bool m_running;
 		uint32_t m_returnCode;
 
-		network::Connexion m_serverSocket;
+		network::NonBlockingConnexion m_serverSocket;
 		std::array<std::shared_ptr<network::Connexion>, 10> m_clients;
 	};
 }
