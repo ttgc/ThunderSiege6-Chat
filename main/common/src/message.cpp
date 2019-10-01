@@ -15,9 +15,11 @@ namespace network
 				m_message(message), m_type(msgType), m_team(playerTeam), m_player(username)
 		{}
 
-		std::optional<Message> Message::getMessageFromJson(const nlohmann::json & message) noexcept
+		std::optional<Message> Message::getMessageFromJson(const std::string & rawMessage) noexcept
 		{
-			if (message.contains("username") && message.contains("msg_type") &&
+			nlohmann::json message = nlohmann::json::parse(rawMessage, nullptr, false);
+			if (message != nlohmann::detail::value_t::discarded && 
+				message.contains("username") && message.contains("msg_type") &&
 				message.contains("team") && message.contains("msg") &&
 				message.at("msg_type").is_number_unsigned() &&
 				message.at("team").is_number_unsigned() &&
