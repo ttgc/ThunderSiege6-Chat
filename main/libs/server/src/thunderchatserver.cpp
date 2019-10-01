@@ -121,6 +121,7 @@ namespace server
 						couldrecv = selector.isReadSet(cli->getSocket());
 						loop = (!couldrecv) && iter;
 						--iter;
+						std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					}
 
 					if (couldrecv)
@@ -246,22 +247,35 @@ namespace server
 						[](char c) -> char { return c; }
 					);
 
-					std::for_each(
-						std::execution::seq,
+					std::vector<ClientData> target;
+					std::copy_if(
 						m_clients.begin(),
 						m_clients.end(),
-						[buffer, length, selector](const ClientData& cli) {
+						target.begin(),
+						[selector, msg](const ClientData& cli) -> bool {
 							auto connexion = cli.getConnexion();
-							if (connexion != nullptr &&
-								connexion->isActive() &&
-								selector.isWriteSet(connexion->getSocket()))
-							{
-								int sentBytes = send(
-									connexion->getSocket(),
-									buffer.data(),
-									static_cast<int>(length), 0
-								);
-							}
+							if (connexion == nullptr) return false;
+
+							const bool active(connexion->isActive());
+							const bool writable(selector.isWriteSet(connexion->getSocket()));
+							const bool isAuthor(cli.getUsername() == msg.getPlayerUsername());
+							const bool sameTeam(cli.getTeam() == msg.getPlayerTeam());
+							const bool isGlobal(msg.getMessageType() == network::message::GLOBAL);
+
+							return (active && writable && (!isAuthor) && (isGlobal || sameTeam));
+						}
+					);
+
+					std::for_each(
+						std::execution::seq,
+						target.begin(),
+						target.end(),
+						[buffer, length, selector](const ClientData& cli) {
+							int sentBytes = send(
+								cli.getConnexion()->getSocket(),
+								buffer.data(),
+								static_cast<int>(length), 0
+							);
 						}
 					);
 				}
