@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include "message.hpp"
+#include "network.hpp"
 
 namespace client
 {
@@ -14,7 +15,7 @@ namespace client
             using CallbackMsg = std::function<void(const network::message::Message& msg)>;
             using CallbackDeco = std::function<void()>;
 
-            ThunderChatClient(const std::string& ip, const std::string& pseudo, const std::string& team) noexcept;
+            ThunderChatClient(const std::string& ip, const std::string& username, const std::string& team) noexcept;
 		    virtual ~ThunderChatClient() noexcept;
 		    ThunderChatClient(ThunderChatClient&& other) noexcept;
 
