@@ -24,7 +24,7 @@ namespace client
             ThunderChatClient(const ThunderChatClient& other) = delete;
 		    ThunderChatClient& operator=(const ThunderChatClient& rhs) = delete;
 
-            bool Connect(const SOCKET & s, const sockaddr & clientAddr, socklen_t clientAddrSize) noexcept;
+            bool Connect() noexcept;
 
             void OnMessage(const CallbackMsg& msg) noexcept;
 
@@ -39,7 +39,10 @@ namespace client
 			std::string m_username;
             network::message::Team m_team;
             SOCKET m_s;
+            sockaddr m_clientAddr;
+            socklen_t m_clientAddrSize;
             SOCKET m_client;
+            sockaddr_in m_addrv4;
 			std::vector<CallbackMsg> m_messageCallback;
             std::vector<CallbackDeco> m_disconnectCallback;
 			
