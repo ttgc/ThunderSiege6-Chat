@@ -1,5 +1,6 @@
 #include "ThunderChatClient.hpp"
 #include "network.hpp"
+#include "message.hpp"
 #include <array>
 #include <iostream>
 #include <string>
@@ -116,24 +117,24 @@ namespace client
             else
             {
                 std::string received(buffer.data(), length_msg);
-                auto msg = network::Message::getMessageFromJson(received);
-                if(msg.has_value() && msg.isCorrectlySized())
+                auto msg = network::message::Message::getMessageFromJson(received);
+                if (msg.has_value() && msg.value().isCorrectlySized())
                 {
                     OnMessage(msg);
-                    std::string username(msg.username);
+                    std::string username(msg.value().getPlayerUsername);
                     std::string team;
                     std::string message;
-                    if(msg.msg_type)
+                    if (msg.value().getMessageType)
                     {   
                         std::string type(" (to Team ");
-                        if(msg.team)    {   std::string team = "B) : ";  }
+                        if (msg.value().getMessageType) { std::string team = "B) : "; }
                         else            {   std::string team = "A) : ";  }
-                        std::string message = username + type + team + msg.message;
+                        std::string message = username + type + team + msg.value().getMessage;
                     }
                     else
                     {
                         std::string type(" (to Party) : ");
-                        std::string message = username + type + msg.message;
+                        std::string message = username + type + msg.value().getMessage;
                     }
                     std::cout << message << std::endl;
                 }
