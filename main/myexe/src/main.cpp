@@ -1,6 +1,5 @@
 #include <iostream>
 #include "ThunderChatClient.hpp"
-#include <iostream>
 
 #ifdef _WIN32
 #include "winnetworkconfig.hpp"
@@ -20,6 +19,6 @@ int main(void)
 		if (client.Connect()) { 
 
 			std::cin.ignore();
-			client.SendToParty("Wesh, tu suces ?");
+			client.SendToParty("Test send to party");
 		}
 }
