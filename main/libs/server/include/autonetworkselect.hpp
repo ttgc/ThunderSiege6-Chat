@@ -20,7 +20,7 @@ namespace server
 		AutoNetworkSelect& operator=(const AutoNetworkSelect& rhs) noexcept;
 		AutoNetworkSelect& operator=(AutoNetworkSelect&& rhs) = default;
 
-		bool hasFailed() const noexcept { return (m_retCode <= 0); }
+		bool hasFailed() const noexcept { return (m_retCode < 0); }
 		int getReturnCode() const noexcept { return m_retCode; }
 		timeval getTimeout() const noexcept { return m_timeout; }
 

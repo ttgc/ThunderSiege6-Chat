@@ -117,7 +117,7 @@ namespace server
 							vec, std::vector<SOCKET>(), std::vector<SOCKET>(),
 							std::chrono::microseconds(1000)
 						);
-						//if (selector.hasFailed()) return ClientData();
+						if (selector.hasFailed()) return ClientData();
 						couldrecv = selector.isReadSet(cli->getSocket());
 						loop = (!couldrecv) && iter;
 						--iter;
@@ -151,13 +151,17 @@ namespace server
 
 		while (m_running)
 		{
-			std::replace_if(
+			std::transform( 
 				m_clients.begin(),
 				m_clients.end(),
-				[](const ClientData& cli) -> bool {
-					return cli.getConnexion() != nullptr && !cli.getConnexion()->isActive();
-				},
-				generator()
+				m_clients.begin(),
+				[generator](const ClientData& cli) -> ClientData {
+					if (cli.getConnexion() == nullptr || !cli.getConnexion()->isActive())
+					{
+						return generator();
+					}
+					return cli;
+				}
 			);
 		}
 	}
@@ -280,6 +284,7 @@ namespace server
 					);
 				}
 			);
+			m_messageQueue.clear();
 		}
 	}
 }

@@ -16,9 +16,12 @@ namespace network
 		m_active(true), m_socket(sock), m_ip(),
 		m_port(ntohs(reinterpret_cast<sockaddr_in*>(&addr)->sin_port))
 	{
-		std::array<char, 512> ip;
-		auto retCode = inet_ntop(addr.sa_family, &addr, ip.data(), 512);
-		m_ip = std::string(ip.begin(), ip.end());
+		std::array<char, INET_ADDRSTRLEN> ip;
+		auto retCode = inet_ntop(addr.sa_family, &addr, ip.data(), INET_ADDRSTRLEN);
+		auto end = std::remove_if(ip.begin(), ip.end(), [](char c) -> bool {
+			return ((c < '0') || (c > '9')) && (c != '.');
+		});
+		m_ip = std::string(ip.begin(), end);
 		if (retCode == nullptr) m_active = false;
 	}
 

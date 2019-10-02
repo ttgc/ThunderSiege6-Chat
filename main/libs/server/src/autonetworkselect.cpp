@@ -139,16 +139,16 @@ namespace server
 
 	bool AutoNetworkSelect::isReadSet(const SOCKET& socket) const noexcept
 	{
-		return FD_ISSET(socket, m_reading.get());
+		return m_reading == nullptr ? false : FD_ISSET(socket, m_reading.get());
 	}
 
 	bool AutoNetworkSelect::isWriteSet(const SOCKET& socket) const noexcept
 	{
-		return FD_ISSET(socket, m_writing.get());
+		return m_writing == nullptr ? false : FD_ISSET(socket, m_writing.get());
 	}
 
 	bool AutoNetworkSelect::isExceptSet(const SOCKET& socket) const noexcept
 	{
-		return FD_ISSET(socket, m_except.get());
+		return m_except == nullptr ? false : FD_ISSET(socket, m_except.get());
 	}
 }
