@@ -8,6 +8,7 @@
 #include <thread>
 #include "message.hpp"
 #include "network.hpp"
+#include "dnsresolver.hpp"
 #include <atomic>
 
 namespace client

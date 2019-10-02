@@ -1,10 +1,4 @@
 #include "ThunderChatClient.hpp"
-#include "network.hpp"
-#include "message.hpp"
-#include <array>
-#include <iostream>
-#include <string>
-#include <vector>
 
 namespace client
 {
@@ -29,10 +23,30 @@ namespace client
             std::cout << "Error";
             return;
         }
+
+        std::string just_ip;
+        std::string port;
+        std::size_t pos = m_ip.find_last_of(":");
+        if (pos == m_ip.length()-6)
+        {
+            port = m_ip.substr(m_ip.length()-6, 5);
+        }
+        else
+        {
+            port = "8888";
+        }
+        just_ip = m_ip.substr(0, pos);
+        
+        network::DNSresolver::DNSresolver(just_ip);
+        std::vector<sockaddr_in> vect;
+        vect = network::DNSresolver::all();
+        if(vect != nullptr) just_ip = vect.end();
+
+        uint_16t p = std::stoi(port);
         
         m_addrv4.sin_family = AF_INET;
-        m_addrv4.sin_port = htons(8888);
-        if (inet_pton(AF_INET, ip.c_str(), &(m_addrv4.sin_addr)) < 0)
+        m_addrv4.sin_port = htons(p);
+        if (inet_pton(AF_INET, just_ip.c_str(), &(m_addrv4.sin_addr)) < 0)
         {
             std::cout << "Error";
             return;
