@@ -20,6 +20,8 @@ namespace client
         , m_addrv4()
         , m_messageCallback()
         , m_disconnectCallback()
+        , m_running(false)
+        , m_clientThread(nullptr)
     {
         if (m_s < 0)
         {
@@ -34,10 +36,15 @@ namespace client
             std::cout << "Error";
             return;
         }
+
+        m_running = true;
+        m_clientThread = std::make_unique<std::thread>([this]() { run(); });
     }
 
     ThunderChatClient::~ThunderChatClient() noexcept
     {
+        m_running = false;
+        OnDisconnect(std::function<void()>); // QUESTION
         shutdown(m_s, SD_BOTH);
         closesocket(m_s);
     }
@@ -95,4 +102,42 @@ namespace client
         }
     }
 
+    void ThunderChatClient::run() noexcept
+    {
+        while (m_running)
+        {
+            std::array<char, 1024> buffer;
+            int length_msg = recv(m_s, buffer.data(), 1024, 0);
+            if(length_msg < 0)
+            {
+                std::cout << "Error" << std::endl;
+                return;
+            }
+            else
+            {
+                std::string received(buffer.data(), length_msg);
+                auto msg = network::Message::getMessageFromJson(received);
+                if(msg.has_value() && msg.isCorrectlySized())
+                {
+                    OnMessage(msg);
+                    std::string username(msg.username);
+                    std::string team;
+                    std::string message;
+                    if(msg.msg_type)
+                    {   
+                        std::string type(" (to Team ");
+                        if(msg.team)    {   std::string team = "B) : ";  }
+                        else            {   std::string team = "A) : ";  }
+                        std::string message = username + type + team + msg.message;
+                    }
+                    else
+                    {
+                        std::string type(" (to Party) : ");
+                        std::string message = username + type + msg.message;
+                    }
+                    std::cout << message << std::endl;
+                }
+            }
+        }
+    }
 }

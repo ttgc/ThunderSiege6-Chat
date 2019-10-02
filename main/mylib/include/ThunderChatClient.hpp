@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <thread>
 #include "message.hpp"
 #include "network.hpp"
 
@@ -35,6 +36,7 @@ namespace client
             void SendToTeam(const std::string& msg);
 
         private:
+            void run() noexcept;
             std::string m_ip;
 			std::string m_username;
             network::message::Team m_team;
@@ -45,6 +47,7 @@ namespace client
             sockaddr_in m_addrv4;
 			std::vector<CallbackMsg> m_messageCallback;
             std::vector<CallbackDeco> m_disconnectCallback;
-			
+            std::atomic_bool m_running;
+			std::unique_ptr<std::thread> m_clientThread;
     };
 }
