@@ -1,8 +1,8 @@
-#include <execution>
 #include <fmt/format.h>
 #include "message.hpp"
 #include "autonetworkselect.hpp"
 #include "thunderchatserver.hpp"
+#pragma warning(disable: 26444)
 
 namespace server
 {
@@ -72,9 +72,8 @@ namespace server
 					auto connexion = cli.getConnexion();
 					if (connexion != nullptr && connexion->isActive())
 					{
-						cli.getConnexion()->close();
+						cli.getConnexion()->close_();
 						std::for_each(
-							std::execution::par,
 							m_disconnectCallback.begin(),
 							m_disconnectCallback.end(),
 							[connexion](CallbackType callback) {
@@ -85,7 +84,7 @@ namespace server
 				}
 			);
 
-			m_serverSocket.close();
+			m_serverSocket.close_();
 		}
 	}
 
@@ -130,7 +129,6 @@ namespace server
 									(msg.value().getPlayerTeam() == network::message::TEAM_B && m_teamBSizing < 5)))
 							{
 								std::for_each(
-									std::execution::par,
 									m_connectCallback.begin(),
 									m_connectCallback.end(),
 									[cli](CallbackType callback) {
@@ -196,18 +194,16 @@ namespace server
 			AutoNetworkSelect selector(vec, vec, vec, std::chrono::microseconds(10));
 
 			std::for_each(
-				std::execution::par,
 				m_clients.begin(),
 				m_clients.end(),
-				[this, selector](const ClientData& cli) {
+				[this, &selector](const ClientData& cli) {
 					if (cli.getConnexion() != nullptr && cli.getConnexion()->isActive())
 					{
 						auto connexion = cli.getConnexion();
 						if (selector.isExceptSet(connexion->getSocket()))
 						{
-							connexion->close();
+							connexion->close_();
 							std::for_each(
-								std::execution::par,
 								m_disconnectCallback.begin(),
 								m_disconnectCallback.end(),
 								[connexion](CallbackType callback) {
@@ -241,10 +237,9 @@ namespace server
 			);
 
 			std::for_each(
-				std::execution::par,
 				m_messageQueue.begin(),
 				m_messageQueue.end(),
-				[this, selector](const network::message::Message& msg) {
+				[this, &selector](const network::message::Message& msg) {
 					auto rawMessage = msg.getJsonMessage().dump();
 					std::array<char, 1024> buffer;
 					size_t length = rawMessage.size() <= 1024 ? rawMessage.size() : 1024;
@@ -255,7 +250,7 @@ namespace server
 						[](char c) -> char { return c; }
 					);
 
-					const auto checkSend = [selector, msg](const ClientData& cli) -> bool {
+					const auto checkSend = [&selector, msg](const ClientData& cli) -> bool {
 						auto connexion = cli.getConnexion();
 						if (connexion == nullptr) return false;
 
@@ -278,10 +273,9 @@ namespace server
 					);
 
 					std::for_each(
-						std::execution::seq,
 						target.begin(),
 						target.end(),
-						[buffer, length, selector](const ClientData& cli) {
+						[buffer, length, &selector](const ClientData& cli) {
 							int sentBytes = send(
 								cli.getConnexion()->getSocket(),
 								buffer.data(),
@@ -295,3 +289,5 @@ namespace server
 		}
 	}
 }
+
+#pragma warning(default: 26444)

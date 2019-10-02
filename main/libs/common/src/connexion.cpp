@@ -27,10 +27,10 @@ namespace network
 
 	Connexion::~Connexion() noexcept
 	{
-		close();
+		close_();
 	}
 
-	void Connexion::close() noexcept
+	void Connexion::close_() noexcept
 	{
 		if (isActive())
 		{

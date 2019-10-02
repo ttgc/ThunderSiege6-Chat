@@ -14,10 +14,12 @@ namespace server
 			const std::vector<SOCKET>& except,
 			const std::chrono::microseconds timeout
 		) noexcept;
-		AutoNetworkSelect(const AutoNetworkSelect& other) noexcept;
+		//AutoNetworkSelect(const AutoNetworkSelect& other) noexcept;
+		AutoNetworkSelect(const AutoNetworkSelect& other) = delete;
 		AutoNetworkSelect(AutoNetworkSelect&& other) = default;
 		~AutoNetworkSelect() = default;
-		AutoNetworkSelect& operator=(const AutoNetworkSelect& rhs) noexcept;
+		//AutoNetworkSelect& operator=(const AutoNetworkSelect& rhs) noexcept;
+		AutoNetworkSelect& operator=(const AutoNetworkSelect& rhs) = delete;
 		AutoNetworkSelect& operator=(AutoNetworkSelect&& rhs) = default;
 
 		bool hasFailed() const noexcept { return (m_retCode < 0); }
