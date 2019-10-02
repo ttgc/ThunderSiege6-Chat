@@ -26,7 +26,7 @@ namespace network
 				(message.at("msg_type") == GLOBAL || message.at("msg_type") == TEAM) &&
 				(message.at("team") == TEAM_A || message.at("team") == TEAM_B))
 			{
-				return Message(message);
+				return std::make_optional<Message>(std::move(Message(message)));
 			}
 			return std::nullopt;
 		}
