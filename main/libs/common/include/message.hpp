@@ -23,13 +23,13 @@ namespace network
 				Team playerTeam,
 				const std::string& message
 			) noexcept;
-			static std::optional<Message> getMessageFromJson(const nlohmann::json& message) noexcept;
+			static std::optional<Message> getMessageFromJson(const std::string& message) noexcept;
 
-			Message(const Message& other) noexcept = default;
-			Message(Message&& other) noexcept = default;
-			virtual ~Message() noexcept = default;
-			Message& operator=(const Message& rhs) noexcept = default;
-			Message& operator=(Message&& rhs) noexcept = default;
+			Message(const Message& other) = default;
+			Message(Message&& other) = default;
+			virtual ~Message() = default;
+			Message& operator=(const Message& rhs) = default;
+			Message& operator=(Message&& rhs) = default;
 
 			std::string getMessage() const noexcept { return m_message; }
 			MessageType getMessageType() const noexcept { return m_type; }
