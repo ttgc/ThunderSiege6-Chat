@@ -1,40 +1,38 @@
 #include "dnsresolver.hpp"
 #include "..\include\dnsresolver.hpp"
 
+
 namespace network
 {
 	DNSresolver::DNSresolver(const std::string& hostname) noexcept :
 		m_hostname(hostname), m_address()
 	{
-		/*
-		 * Make the DNS request
-		 * https://www.usna.edu/Users/cs/aviv/classes/ic221/s16/lec/26/lec.html
-		 * Use reinterpret_cast for casting
-		 */
+		struct addrinfo type;
+		memset(&type, 0, sizeof(struct addrinfo));
+		type.ai_family = AF_INET;
+		if(getaddrinfo(m_hostname, NULL, &type, &m_address) != 0) {
+			std::cout >> "Error\n"
+			return
+		}
 	}
 
-	sockaddr_in DNSresolver::first() const noexcept
+	std::optional<sockaddr_in> DNSresolver::first() const noexcept
 	{
-		/*
-		 * Send the first sockaddr (by copy) of m_address
-		 */
-		return sockaddr_in();
-	}
-
-	sockaddr_in DNSresolver::last() const noexcept
-	{
-		/*
-		 * Send the last sockaddr (by copy) of m_address
-		 */
-		return sockaddr_in();
+		if(m_address == nullptr) return std::nullopt;
+		sockaddr_in sockin_ipv4 = reinterpret_cast<sockaddr_in*>(m_address.ai_addr);
+		return return std::make_optionnal<sockaddr_in>(sockin_ipv4);
 	}
 
 	std::vector<sockaddr_in> DNSresolver::all() const noexcept
 	{
-		/*
-		 * Build vector
-		 * Use std::transform to iterate through m_address
-		 */
-		return std::vector<sockaddr_in>();
+		std::vector<sockaddr_in> vect;
+		sockaddr_in sockin_ipv4;
+		while (&m_address.ai_next != nullptr)
+		{
+			sockin_ipv4 = reinterpret_cast<sockaddr_in*>(m_address.ai_addr);
+			vect.push_back(sockin_ipv4));
+			&m_address = &m_address.ai_next;
+		}
+		return vect;
 	}
 }

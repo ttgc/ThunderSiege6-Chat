@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <optional>
+#include <functional>
 #include "network.hpp"
 
 namespace network
@@ -15,8 +17,7 @@ namespace network
 		DNSresolver& operator=(const DNSresolver& rhs) = delete;
 		DNSresolver& operator=(DNSresolver&& rhs) = default;
 
-		sockaddr_in first() const noexcept;
-		sockaddr_in last() const noexcept;
+		std::optional<sockaddr_in> first() const noexcept;
 		std::vector<sockaddr_in> all() const noexcept;
 
 	private:
