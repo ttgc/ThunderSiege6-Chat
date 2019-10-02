@@ -43,7 +43,7 @@ namespace server
 		);
 	}
 
-	AutoNetworkSelect::AutoNetworkSelect(const AutoNetworkSelect& other) noexcept :
+	/*AutoNetworkSelect::AutoNetworkSelect(const AutoNetworkSelect& other) noexcept :
 		m_reading(other.m_reading == nullptr ? nullptr : std::make_shared<fd_set>()),
 		m_writing(other.m_writing == nullptr ? nullptr : std::make_shared<fd_set>()),
 		m_except(other.m_except == nullptr ? nullptr : std::make_shared<fd_set>()),
@@ -132,7 +132,7 @@ namespace server
 		m_timeout = rhs.m_timeout;
 		m_retCode = rhs.m_retCode;
 		return *this;
-	}
+	}*/
 
 	bool AutoNetworkSelect::isReadSet(const SOCKET& socket) const noexcept
 	{

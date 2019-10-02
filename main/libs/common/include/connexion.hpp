@@ -22,7 +22,7 @@ namespace network
 		std::string getIP() const noexcept { return m_ip; }
 		uint16_t getPort() const noexcept { return m_port; }
 
-		void close() noexcept;
+		void close_() noexcept;
 
 	protected:
 		bool m_active = false;
