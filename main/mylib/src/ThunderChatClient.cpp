@@ -34,10 +34,6 @@ namespace client
             std::cout << "Error";
             return;
         }
-
-        bool res(true);
-
-        std::cout << "Client is connected." << std::endl;
     }
 
     ThunderChatClient::~ThunderChatClient() noexcept
@@ -49,9 +45,10 @@ namespace client
     // parametre faux, mettre la socket ?
     bool ThunderChatClient::Connect() noexcept
     {
-        if (auto a = connect(m_s, reinterpret_cast<sockaddr*>(&m_addrv4), m_clientAddrSize))
+        if (connect(m_s, reinterpret_cast<sockaddr*>(&m_addrv4), m_clientAddrSize))
         {
             SendToTeam("Tentative Connection");
+            std::cout << "Client is connected." << std::endl;
             return true;
         }
         else
