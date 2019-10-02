@@ -85,7 +85,7 @@ namespace client
         }
         else
         {
-            std::cout << "Message au mauvais format\n";
+            std::cout << "Message au mauvais format" << std::endl;
         }
     }
 
@@ -99,7 +99,7 @@ namespace client
         }
         else
         {
-            std::cout << "Message au mauvais format\n";
+            std::cout << "Message au mauvais format" << std::endl;
         }
     }
 
