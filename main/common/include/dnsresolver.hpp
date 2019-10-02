@@ -22,7 +22,7 @@ namespace network
 
 	private:
 		std::string m_hostname;
-		addrinfo m_address;
+		std::shared_ptr<addrinfo> m_address;
 	};
 }
 
