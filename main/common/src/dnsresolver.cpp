@@ -1,5 +1,6 @@
 #include "dnsresolver.hpp"
 #include "..\include\dnsresolver.hpp"
+#include <iostream>
 
 
 namespace network
@@ -10,17 +11,17 @@ namespace network
 		struct addrinfo type;
 		memset(&type, 0, sizeof(struct addrinfo));
 		type.ai_family = AF_INET;
-		if(getaddrinfo(m_hostname, NULL, &type, &m_address) != 0) {
-			std::cout >> "Error\n"
-			return
+		if(getaddrinfo(m_hostname.c_str(), NULL, &type, &m_address) != 0) {
+                    std::cout << "Error\n";
+                    return;
 		}
 	}
 
 	std::optional<sockaddr_in> DNSresolver::first() const noexcept
 	{
-		if(m_address == nullptr) return std::nullopt;
+		if(&m_address == nullptr) return std::nullopt;
 		sockaddr_in sockin_ipv4 = reinterpret_cast<sockaddr_in*>(m_address.ai_addr);
-		return return std::make_optionnal<sockaddr_in>(sockin_ipv4);
+                return std::optional<sockaddr_in>(sockin_ipv4);
 	}
 
 	std::vector<sockaddr_in> DNSresolver::all() const noexcept
