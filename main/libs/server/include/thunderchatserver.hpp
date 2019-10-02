@@ -48,6 +48,8 @@ namespace server
 
 		network::NonBlockingConnexion m_serverSocket;
 		std::array<ClientData, 10> m_clients;
+		size_t m_teamASizing;
+		size_t m_teamBSizing;
 
 		std::vector<network::message::Message> m_messageQueue;
 	};

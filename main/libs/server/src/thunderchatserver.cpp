@@ -8,7 +8,8 @@ namespace server
 {
 	ThunderChatServer::ThunderChatServer(const std::string& ip, uint16_t port) noexcept :
 		m_connectCallback(), m_disconnectCallback(), m_acceptThread(nullptr), m_serverThread(nullptr),
-		m_running(false), m_returnCode(0), m_serverSocket(ip, port), m_clients(), m_messageQueue()
+		m_running(false), m_returnCode(0), m_serverSocket(ip, port), m_clients(), m_teamASizing(0),
+		m_teamBSizing(0), m_messageQueue()
 	{
 		m_returnCode = 
 			m_serverSocket.isActive() ? 0 : static_cast<uint32_t>(m_serverSocket.getSocket()) + 1;
@@ -99,15 +100,6 @@ namespace server
 				auto cli = std::make_shared<network::NonBlockingConnexion>(s, clientAddr, clientAddrSize);
 				if (cli->isActive())
 				{
-					std::for_each(
-						std::execution::par,
-						m_connectCallback.begin(),
-						m_connectCallback.end(),
-						[cli](CallbackType callback) {
-							callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
-						}
-					);
-
 					bool loop(true), couldrecv(false);
 					std::vector<SOCKET> vec { cli->getSocket() };
 					int iter = 10;
@@ -133,13 +125,25 @@ namespace server
 						{
 							std::string received(buffer.data(), length);
 							auto msg = network::message::Message::getMessageFromJson(received);
-							if (msg.has_value())
+							if (msg.has_value() && 
+								((msg.value().getPlayerTeam() == network::message::TEAM_A && m_teamASizing < 5) ||
+									(msg.value().getPlayerTeam() == network::message::TEAM_B && m_teamBSizing < 5)))
 							{
+								std::for_each(
+									std::execution::par,
+									m_connectCallback.begin(),
+									m_connectCallback.end(),
+									[cli](CallbackType callback) {
+										callback(fmt::format("{}:{}", cli->getIP(), cli->getPort()));
+									}
+								);
 								ClientData data(
 									msg.value().getPlayerUsername(),
 									msg.value().getPlayerTeam(),
 									std::move(cli)
 								);
+								if (data.getTeam() == network::message::TEAM_A) m_teamASizing++;
+								if (data.getTeam() == network::message::TEAM_B) m_teamBSizing++;
 								return data;
 							}
 						}
@@ -251,23 +255,26 @@ namespace server
 						[](char c) -> char { return c; }
 					);
 
-					std::vector<ClientData> target;
+					const auto checkSend = [selector, msg](const ClientData& cli) -> bool {
+						auto connexion = cli.getConnexion();
+						if (connexion == nullptr) return false;
+
+						const bool active(connexion->isActive());
+						const bool writable(selector.isWriteSet(connexion->getSocket()));
+						const bool isAuthor(cli.getUsername() == msg.getPlayerUsername());
+						const bool sameTeam(cli.getTeam() == msg.getPlayerTeam());
+						const bool isGlobal(msg.getMessageType() == network::message::GLOBAL);
+
+						return (active && writable && (!isAuthor) && (isGlobal || sameTeam));
+					};
+					std::vector<ClientData> target(
+						std::count_if(m_clients.begin(), m_clients.end(), checkSend)
+					);
 					std::copy_if(
 						m_clients.begin(),
 						m_clients.end(),
 						target.begin(),
-						[selector, msg](const ClientData& cli) -> bool {
-							auto connexion = cli.getConnexion();
-							if (connexion == nullptr) return false;
-
-							const bool active(connexion->isActive());
-							const bool writable(selector.isWriteSet(connexion->getSocket()));
-							const bool isAuthor(cli.getUsername() == msg.getPlayerUsername());
-							const bool sameTeam(cli.getTeam() == msg.getPlayerTeam());
-							const bool isGlobal(msg.getMessageType() == network::message::GLOBAL);
-
-							return (active && writable && (!isAuthor) && (isGlobal || sameTeam));
-						}
+						checkSend
 					);
 
 					std::for_each(

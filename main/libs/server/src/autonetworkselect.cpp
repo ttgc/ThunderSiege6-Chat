@@ -17,12 +17,9 @@ namespace server
 		m_timeout.tv_usec = static_cast<long>(timeout.count() % 1000000);
 
 		std::vector<SOCKET> fullList(read.size() + write.size() + except.size());
-		std::merge(read.begin(), read.end(), write.begin(), write.end(), fullList.begin());
-		std::copy(
-			except.begin(),
-			except.end(),
-			fullList.begin() + read.size() + write.size()
-		);
+		std::copy(read.begin(), read.end(), fullList.begin());
+		std::copy(write.begin(), write.end(), fullList.begin() + read.size());
+		std::copy(except.begin(), except.end(), fullList.begin() + read.size() + write.size());
 
 		if (m_reading != nullptr) FD_ZERO(m_reading.get());
 		if (m_writing != nullptr) FD_ZERO(m_writing.get());
