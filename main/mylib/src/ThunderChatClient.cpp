@@ -66,6 +66,12 @@ namespace client
         closesocket(m_s);
     }
 
+	bool ThunderChatClient::isRunning() 
+	{ 
+		return m_running; 
+	}
+
+
     bool ThunderChatClient::Connect() noexcept
     {
         if (connect(m_s, reinterpret_cast<sockaddr*>(&m_addrv4), m_clientAddrSize))
@@ -118,6 +124,7 @@ namespace client
         }
     }
 
+	
     void ThunderChatClient::run() noexcept
     {
         while (m_running)

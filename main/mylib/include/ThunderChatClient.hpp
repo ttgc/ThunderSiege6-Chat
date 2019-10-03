@@ -38,6 +38,8 @@ namespace client
 
             void SendToTeam(const std::string& msg);
 
+			bool isRunning();
+
         private:
             void run() noexcept;
             std::string m_ip;
