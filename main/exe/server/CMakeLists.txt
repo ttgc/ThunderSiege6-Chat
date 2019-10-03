@@ -13,6 +13,5 @@ set(SOURCES ${SOURCE_FOLDER}/main.cpp)
 set(HEADERS ${INCLUDE_FOLDER}/main.hpp)
 
 #Main exec
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
-target_link_libraries(${PROJECT_NAME} PUBLIC mylib)
+add_executable(${PROJECT_NAME}-Server ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME}-Server PUBLIC Server)

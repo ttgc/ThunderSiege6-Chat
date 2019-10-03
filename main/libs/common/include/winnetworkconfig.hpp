@@ -8,8 +8,8 @@ namespace network
 	public:
 		WinNetworkConfig() noexcept;
 		~WinNetworkConfig() noexcept;
-		WinNetworkConfig(WinNetworkConfig&& other) noexcept = default;
-		WinNetworkConfig& operator=(WinNetworkConfig&& rhs) noexcept = default;
+		WinNetworkConfig(WinNetworkConfig&& other) = default;
+		WinNetworkConfig& operator=(WinNetworkConfig&& rhs) = default;
 
 		WinNetworkConfig(const WinNetworkConfig& other) = delete;
 		WinNetworkConfig& operator=(const WinNetworkConfig& rhs) = delete;

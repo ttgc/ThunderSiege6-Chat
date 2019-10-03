@@ -61,7 +61,10 @@ namespace client
     ThunderChatClient::~ThunderChatClient() noexcept
     {
         m_running = false;
-        //foreach ?
+        if(m_clientThread.joinable)
+        {
+            m_clientThread.join();
+        } 
         shutdown(m_s, SD_BOTH);
         closesocket(m_s);
     }
@@ -106,7 +109,11 @@ namespace client
         }
         else
         {
-            std::cout << "Message au mauvais format" << std::endl;
+            std::for_each(list.begin(), list.end(), [](const CallbackDeco& callback) {
+                    callback()
+                }
+                m_running = false;
+                return;
         }
     }
 
@@ -116,11 +123,15 @@ namespace client
         if (msg.isCorrectlySized())
         {
             std::string message = msg.getJsonMessage().dump();
-            auto a = send(m_s, message.c_str(), message.size(), 0);
+            send(m_s, message.c_str(), message.size(), 0);
         }
         else
         {
-            std::cout << "Message au mauvais format" << std::endl;
+            std::for_each(list.begin(), list.end(), [](const CallbackDeco& callback) {
+                    callback()
+                }
+                m_running = false;
+                return;
         }
     }
 
@@ -133,7 +144,10 @@ namespace client
             int length_msg = recv(m_s, buffer.data(), 1024, 0);
             if(length_msg < 0)
             {
-                std::cout << "Error" << std::endl;
+                std::for_each(list.begin(), list.end(), [](const CallbackDeco& callback) {
+                    callback()
+                }
+                m_running = false;
                 return;
             }
             else
@@ -142,7 +156,10 @@ namespace client
                 auto msg = network::message::Message::getMessageFromJson(received);
                 if (msg.has_value() && msg.value().isCorrectlySized())
                 {
-                    //foreach ?
+                    std::for_each(list.begin(), list.end(), [](const CallbackMsg& callback) 
+                    {
+                        callback()
+                    }
                     std::string username(msg.value().getPlayerUsername);
                     std::string team;
                     std::string message;
