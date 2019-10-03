@@ -18,7 +18,7 @@ namespace network
 
 	std::optional<sockaddr_in> DNSresolver::first() const noexcept
 	{
-		if(&m_address == nullptr) return std::nullopt;
+		if(m_address == nullptr) return std::nullopt;
 		sockaddr_in* sockin_ipv4 = reinterpret_cast<sockaddr_in*>(m_address->ai_addr);
         return std::optional<sockaddr_in>(*sockin_ipv4);
 	}
@@ -27,9 +27,9 @@ namespace network
 	{
 		std::vector<sockaddr_in> vect;
 		auto iterator = m_address.get();
-		while (m_address->ai_next != nullptr)
+		while (iterator != nullptr)
 		{
-			sockaddr_in* sockin_ipv4 = reinterpret_cast<sockaddr_in*>(m_address->ai_addr);
+			sockaddr_in* sockin_ipv4 = reinterpret_cast<sockaddr_in*>(iterator->ai_addr);
 			vect.push_back(*sockin_ipv4);
 			iterator = m_address->ai_next;
 		}

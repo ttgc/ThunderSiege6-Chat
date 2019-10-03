@@ -1,5 +1,7 @@
 #include <array>
 #include <algorithm>
+#include <regex>
+#include "dnsresolver.hpp"
 #include "connexion.hpp"
 
 namespace network
@@ -9,6 +11,31 @@ namespace network
 	Connexion::Connexion(const std::string& ip, uint16_t port) noexcept :
 		m_active(false), m_socket(), m_ip(ip), m_port(port)
 	{
+		std::regex regex("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+		if (!std::regex_match(ip, regex))
+		{
+			DNSresolver dns(ip);
+			auto ipfromdns = dns.first();
+			if (!ipfromdns.has_value())
+			{
+				m_active = false;
+				return;
+			}
+
+			std::array<char, INET_ADDRSTRLEN> buffer;
+			auto retCode = 
+				inet_ntop(AF_INET, &(ipfromdns.value().sin_addr), buffer.data(), INET_ADDRSTRLEN);
+			if (retCode == nullptr)
+			{
+				m_active = false;
+				return;
+			}
+
+			auto end = std::remove_if(buffer.begin(), buffer.end(), [](char c) -> bool {
+				return ((c < '0') || (c > '9')) && (c != '.');
+			});
+			m_ip = std::string(buffer.begin(), end);
+		}
 		m_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if (m_socket > 0) m_active = true;
 	}
