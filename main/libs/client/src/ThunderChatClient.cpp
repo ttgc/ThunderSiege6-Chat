@@ -40,7 +40,7 @@ namespace client
         int p = std::stoi(port);
         uint16_t p2 = p;
 
-        network::Connexion(just_ip, p2);
+        m_client = network::Connexion(just_ip, p2);
 
        /* network::DNSresolver::DNSresolver(just_ip);
         std::vector<sockaddr_in> vect;

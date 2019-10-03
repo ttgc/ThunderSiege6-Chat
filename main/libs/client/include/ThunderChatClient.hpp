@@ -24,7 +24,7 @@ namespace client
             ThunderChatClient(const std::string& ip, const std::string& username,
                               const network::message::Team & team) noexcept;
 		    virtual ~ThunderChatClient() noexcept;
-		    ThunderChatClient(ThunderChatClient&& other) noexcept;
+		    ThunderChatClient(ThunderChatClient&& other) = default;
 
             ThunderChatClient(const ThunderChatClient& other) = delete;
 		    ThunderChatClient& operator=(const ThunderChatClient& rhs) = delete;
@@ -49,7 +49,7 @@ namespace client
             SOCKET m_s;
             sockaddr m_clientAddr;
             socklen_t m_clientAddrSize;
-            SOCKET m_client;
+            network::Connexion m_client;
             sockaddr_in m_addrv4;
 			std::vector<CallbackMsg> m_messageCallback;
             std::vector<CallbackDeco> m_disconnectCallback;
