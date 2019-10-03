@@ -55,23 +55,27 @@ int main(void)
 
     client::ThunderChatClient client(ip, username, teamUser);
 
+    client.OnMessage([](const network::message::Message& msg) { std::cout << msg.getMessage() << "\n"; });
+
+    client.OnDisconnect([]() { std::cout << "disconnected !\n"; });
+
     if (client.Connect())
     {
-        while(client::ThunderChatClient::m_running)
+        while(client.isRunning())
         {
             std::string message;
-            getline(cin, message);
+            getline(std::cin, message);
             std::string send;
             if (message.rfind("/all ", 0) && message.length > 5)
             {
                 message = message.substr(5);
                 send = username + " (to Party) : " + message;
-                client::ThunderChatClient::SendToParty(message);
+                client.SendToParty(message);
             }
             else
             {
                 send = username + " (to Team " + teamChoice + ") : " + message;
-                client::ThunderChatClient::SendToTeam(message);
+                client.SendToTeam(message);
             }
             std::cout << send << std::endl;
         }

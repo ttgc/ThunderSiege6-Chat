@@ -40,12 +40,14 @@ namespace client
         network::DNSresolver::DNSresolver(just_ip);
         std::vector<sockaddr_in> vect;
         vect = network::DNSresolver::all();
-        if(vect != nullptr) just_ip = vect.end();
-
-        uint_16t p = std::stoi(port);
         
+        if(!vect.empty) m_addrv4 = vect.back();
+
+        int p = std::stoi(port);
+        uint16_t p2 = p;
+
         m_addrv4.sin_family = AF_INET;
-        m_addrv4.sin_port = htons(p);
+        m_addrv4.sin_port = htons(p2);
         if (inet_pton(AF_INET, just_ip.c_str(), &(m_addrv4.sin_addr)) < 0)
         {
             std::cout << "Error";
@@ -59,12 +61,11 @@ namespace client
     ThunderChatClient::~ThunderChatClient() noexcept
     {
         m_running = false;
-        OnDisconnect(std::function<void()>); // QUESTION
+        //foreach ?
         shutdown(m_s, SD_BOTH);
         closesocket(m_s);
     }
 
-    // parametre faux, mettre la socket ?
     bool ThunderChatClient::Connect() noexcept
     {
         if (connect(m_s, reinterpret_cast<sockaddr*>(&m_addrv4), m_clientAddrSize))
@@ -134,7 +135,7 @@ namespace client
                 auto msg = network::message::Message::getMessageFromJson(received);
                 if (msg.has_value() && msg.value().isCorrectlySized())
                 {
-                    OnMessage(msg);
+                    //foreach ?
                     std::string username(msg.value().getPlayerUsername);
                     std::string team;
                     std::string message;
