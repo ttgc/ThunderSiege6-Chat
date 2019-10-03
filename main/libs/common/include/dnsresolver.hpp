@@ -3,6 +3,9 @@
 #include <vector>
 #include <optional>
 #include <functional>
+#include <string.h>
+#include <memory>
+#include <wchar.h>
 #include "network.hpp"
 
 namespace network

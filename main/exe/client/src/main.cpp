@@ -27,11 +27,11 @@ int main(void)
     do
     {
         std::cin >> username;
-        if (username.length < 1 && username.length > 24)
+        if (username.length() < 1 && username.length() > 24)
         {
             std::cout << "Le pseudonyme choisi n'est pas conforme, il doit être inférieur a 24 caractères." << std::endl;
         }
-    } while (username.length < 1 && username.length > 24);
+    } while (username.length() < 1 && username.length() > 24);
     std::cout << "3. L'Equipe que vous souhaitez rejoindre." << std::endl;
     std::cout << "A : Equipe A" << std::endl;
     std::cout << "B : Equipe B" << std::endl;
@@ -66,7 +66,7 @@ int main(void)
             std::string message;
             getline(std::cin, message);
             std::string send;
-            if (message.rfind("/all ", 0) && message.length > 5)
+            if (message.rfind("/all ", 0) && message.length() > 5)
             {
                 message = message.substr(5);
                 send = username + " (to Party) : " + message;

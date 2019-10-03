@@ -37,14 +37,16 @@ namespace client
         }
         just_ip = m_ip.substr(0, pos);
         
-        network::DNSresolver::DNSresolver(just_ip);
+        int p = std::stoi(port);
+        uint16_t p2 = p;
+
+        network::Connexion(just_ip, p2);
+
+       /* network::DNSresolver::DNSresolver(just_ip);
         std::vector<sockaddr_in> vect;
         vect = network::DNSresolver::all();
         
-        if(!vect.empty) m_addrv4 = vect.back();
-
-        int p = std::stoi(port);
-        uint16_t p2 = p;
+        if(!vect.empty) m_addrv4 = vect.back();*/
 
         m_addrv4.sin_family = AF_INET;
         m_addrv4.sin_port = htons(p2);
@@ -61,9 +63,9 @@ namespace client
     ThunderChatClient::~ThunderChatClient() noexcept
     {
         m_running = false;
-        if(m_clientThread.joinable)
+        if(m_clientThread->joinable())
         {
-            m_clientThread.join();
+            m_clientThread->join();
         } 
         shutdown(m_s, SD_BOTH);
         closesocket(m_s);
@@ -109,9 +111,9 @@ namespace client
         }
         else
         {
-            std::for_each(list.begin(), list.end(), [](const CallbackDeco& callback) {
-                    callback()
-                }
+            std::for_each(m_disconnectCallback.begin(), m_disconnectCallback.end(), [](const CallbackDeco& callback) {
+                    callback();
+                });
                 m_running = false;
                 return;
         }
@@ -127,9 +129,9 @@ namespace client
         }
         else
         {
-            std::for_each(list.begin(), list.end(), [](const CallbackDeco& callback) {
-                    callback()
-                }
+            std::for_each(m_disconnectCallback.begin(), m_disconnectCallback.end(), [](const CallbackDeco& callback) {
+                    callback();
+                });
                 m_running = false;
                 return;
         }
@@ -144,9 +146,9 @@ namespace client
             int length_msg = recv(m_s, buffer.data(), 1024, 0);
             if(length_msg < 0)
             {
-                std::for_each(list.begin(), list.end(), [](const CallbackDeco& callback) {
-                    callback()
-                }
+                std::for_each(m_disconnectCallback.begin(), m_disconnectCallback.end(), [](const CallbackDeco& callback) {
+                    callback();
+                });
                 m_running = false;
                 return;
             }
@@ -156,24 +158,24 @@ namespace client
                 auto msg = network::message::Message::getMessageFromJson(received);
                 if (msg.has_value() && msg.value().isCorrectlySized())
                 {
-                    std::for_each(list.begin(), list.end(), [](const CallbackMsg& callback) 
+                    std::for_each(m_messageCallback.begin(), m_messageCallback.end(), [&msg](const CallbackMsg& callback) 
                     {
-                        callback()
-                    }
-                    std::string username(msg.value().getPlayerUsername);
+                        callback(msg.value());
+                    });
+                    std::string username(msg.value().getPlayerUsername());
                     std::string team;
                     std::string message;
-                    if (msg.value().getMessageType)
+                    if (msg.value().getMessageType())
                     {   
                         std::string type(" (to Team ");
-                        if (msg.value().getMessageType) { std::string team = "B) : "; }
+                        if (msg.value().getMessageType()) { std::string team = "B) : "; }
                         else            {   std::string team = "A) : ";  }
-                        std::string message = username + type + team + msg.value().getMessage;
+                        std::string message = username + type + team + msg.value().getMessage();
                     }
                     else
                     {
                         std::string type(" (to Party) : ");
-                        std::string message = username + type + msg.value().getMessage;
+                        std::string message = username + type + msg.value().getMessage();
                     }
                     std::cout << message << std::endl;
                 }

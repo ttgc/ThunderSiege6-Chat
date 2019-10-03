@@ -10,6 +10,7 @@
 #include "message.hpp"
 #include "network.hpp"
 #include "dnsresolver.hpp"
+#include "connexion.hpp"
 #include <atomic>
 
 namespace client
