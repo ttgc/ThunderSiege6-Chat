@@ -13,7 +13,7 @@ set(SOURCES ${SOURCE_FOLDER}/ThunderChatClient.cpp)
 set(HEADERS ${INCLUDE_FOLDER}/ThunderChatClient.hpp)
 
 #Main lib
-add_library(mylib ${SOURCES} ${HEADERS})
-target_include_directories(mylib SYSTEM INTERFACE ${INCLUDE_FOLDER})
+add_library(Client ${SOURCES} ${HEADERS})
+target_include_directories(Client SYSTEM INTERFACE ${INCLUDE_FOLDER})
 
-target_link_libraries(mylib PUBLIC Common)
+target_link_libraries(Client PUBLIC Common)
