@@ -79,7 +79,7 @@ namespace client
 
     bool ThunderChatClient::Connect() noexcept
     {
-        if (connect(m_s, reinterpret_cast<sockaddr*>(&m_addrv4), m_clientAddrSize))
+        if (connect(m_s, reinterpret_cast<sockaddr*>(&m_addrv4), m_clientAddrSize) == 0)
         {
             SendToTeam("Tentative Connection");
             std::cout << "Client is connected." << std::endl;
