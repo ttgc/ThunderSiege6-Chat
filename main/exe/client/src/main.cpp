@@ -38,11 +38,11 @@ int main(void)
     do
     {
         std::cin >> teamChoice;
-        if (teamChoice != "A" || teamChoice != "B")
+        if (teamChoice != "A" && teamChoice != "B")
         {
             std::cout << "L'Equipe choisie n'existe pas ! Veuillez choisir A ou B. " << std::endl;
         }
-    } while (teamChoice != "A" || teamChoice != "B");
+    } while (teamChoice != "A" && teamChoice != "B");
 
 	if (teamChoice == "A") 
 	{ 
