@@ -7,11 +7,11 @@ set(INCLUDE_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${INCLUDE_FOLDER})
 
 #Source files
-set(SOURCES ${SOURCE_FOLDER}/my_lib.cpp)
+set(SOURCES ${SOURCE_FOLDER}/main.cpp)
 
 #Headers files (for IntelliSense)
-set(HEADERS ${INCLUDE_FOLDER}/my_lib.hpp)
+set(HEADERS ${INCLUDE_FOLDER}/main.hpp)
 
-#Main lib
-add_library(my_lib ${SOURCES} ${HEADERS})
-target_include_directories(my_lib SYSTEM INTERFACE ${INCLUDE_FOLDER})
+#Main exec
+add_executable(${PROJECT_NAME}-Server ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME}-Server PUBLIC Server)
